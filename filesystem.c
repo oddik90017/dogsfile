@@ -19,7 +19,7 @@ FILE* open_filesystem(const char* filename) {
     return file;
 }
 
-// 1.1 Функция создания нового файла (добавляет в конец файловой системы)
+// Функция создания нового файла (добавляет в конец файловой системы)
 int create_new_file(FILE* fs_file, const char* filename, const char* content) {
     fseek(fs_file, 0, SEEK_END);
     fprintf(fs_file, "/%s\n", filename);
@@ -35,7 +35,7 @@ int create_new_file(FILE* fs_file, const char* filename, const char* content) {
     return 1;
 }
 
-// 1.2 Функция изменения существующего файла
+// Функция изменения существующего файла
 int modify_file(FILE* fs_file, const char* filename, const char* new_content) {
     FILE* temp_file = fopen(TEMP_FS, "w");
     if (temp_file == NULL) {
