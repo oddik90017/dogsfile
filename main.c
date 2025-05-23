@@ -1,75 +1,61 @@
 #include "filesystem.h"
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+
 
 int main() {
+    FILE* fs = init_filesystem();
     int choice;
-    char filename[256];
-    char content[MAX_CONTENT_SIZE];
+    char filename[MAX_FILENAME];
+    char content[MAX_CONTENT];
     
-    while(1) {
-        printf("\nFile System Manager\n");
-        printf("1. Create new file\n");
+    while (1) {
+        printf("\nFile System Menu:\n");
+        printf("1. Create file\n");
         printf("2. Modify file\n");
         printf("3. View file\n");
         printf("4. Delete file\n");
         printf("5. Exit\n");
-        printf("Choice: ");
+        printf("Enter choice: ");
         scanf("%d", &choice);
-        while(getchar() != '\n'); // Очистка буфера ввода
+        while (getchar() != '\n');
         
         if (choice == 5) break;
         
-        switch(choice) {
-            case 1: {
-                printf("Enter filename: ");
-                fgets(filename, sizeof(filename), stdin);
-                filename[strcspn(filename, "\n")] = '\0';
-                
-                printf("Enter content (or press enter for default): ");
+        printf("Enter filename: ");
+        fgets(filename, sizeof(filename), stdin);
+        filename[strcspn(filename, "\n")] = '\0';
+        
+        switch (choice) {
+            case 1:
+                printf("Enter content: ");
                 fgets(content, sizeof(content), stdin);
                 content[strcspn(content, "\n")] = '\0';
-                
-                create_file(filename, content[0] ? content : NULL);
+                create_file(&fs, filename, content);
                 break;
-            }
                 
-            case 2: {
-                printf("Enter filename to modify: ");
-                fgets(filename, sizeof(filename), stdin);
-                filename[strcspn(filename, "\n")] = '\0';
-                
+            case 2:
                 printf("Enter new content: ");
                 fgets(content, sizeof(content), stdin);
                 content[strcspn(content, "\n")] = '\0';
-                
-                modify_file(filename, content);
+                modify_file(&fs, filename, content);
                 break;
-            }
                 
-            case 3: {
-                printf("Enter filename to view: ");
-                fgets(filename, sizeof(filename), stdin);
-                filename[strcspn(filename, "\n")] = '\0';
-                
-                view_file(filename);
+            case 3:
+                view_file(fs, filename);
                 break;
-            }
                 
-            case 4: {
-                printf("Enter filename to delete: ");
-                fgets(filename, sizeof(filename), stdin);
-                filename[strcspn(filename, "\n")] = '\0';
-                
-                delete_file(filename);
+            case 4:
+                delete_file(&fs, filename);
                 break;
-            }
                 
             default:
                 printf("Invalid choice!\n");
         }
     }
     
+    fclose(fs);
     return 0;
 }
