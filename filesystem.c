@@ -1,83 +1,66 @@
+#include "filesystem.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdbool.h>
-#include "filesystem.h"
 
-int main() {
-    FILE* fs_file = NULL;
-    int choice;
-    char filename[256];
-    char content[MAX_CONTENT_SIZE];
-    
-    while(1) {
-        printf("\nFile System Manager\n");
-        printf("1. Create new or Open file\n");
-        printf("2. Modify existing file\n");
-        printf("3. View file\n");
-        printf("4. Delete file\n");
-        printf("5. Exit\n");
-        printf("Choice: ");
-        scanf("%d", &choice);
-        while(getchar() != '\n');
-        
-        switch(choice) {
-            case 1: {
-                printf("Enter filename: ");
-                fgets(filename, sizeof(filename), stdin);
-                filename[strcspn(filename, "\n")] = '\0';
-                
-                printf("Enter content (or press enter for default): ");
-                fgets(content, sizeof(content), stdin);
-                content[strcspn(content, "\n")] = '\0';
-                
-                fs_file = open_filesystem(FS_NAME);
-                create_new_file(fs_file, filename, 
-                              content[0] ? content : NULL);
-                fclose(fs_file);
-                break;
-            }
-                
-            case 2: {
-                printf("Enter filename to modify: ");
-                fgets(filename, sizeof(filename), stdin);
-                filename[strcspn(filename, "\n")] = '\0';
-                
-                printf("Enter new content: ");
-                fgets(content, sizeof(content), stdin);
-                content[strcspn(content, "\n")] = '\0';
-                
-                fs_file = open_filesystem(FS_NAME);
-                modify_file(fs_file, filename, content);
-                break;
-            }
-                
-            case 3: {
-                printf("Enter filename to view: ");
-                fgets(filename, sizeof(filename), stdin);
-                filename[strcspn(filename, "\n")] = '\0';
-                
-                fs_file = open_filesystem(FS_NAME);
-                view_file(fs_file, filename);
-                fclose(fs_file);
-                break;
-            }
-                
-            case 4: {
-                printf("Enter filename to delete: ");
-                fgets(filename, sizeof(filename), stdin);
-                filename[strcspn(filename, "\n")] = '\0';
-                
-                fs_file = open_filesystem(FS_NAME);
-                delete_file(fs_file, filename);
-                break;
-            }
-                
-            case 5:
-                return 0;
-                
-            default:
-                printf("Invalid choice!\n");
-        }
+int create_file(const char* filename, const char* content) {
+    FILE* file = fopen(filename, "w");
+    if (file == NULL) {
+        perror("Failed to create file");
+        return -1;
     }
+    
+    if (content != NULL && content[0] != '\0') {
+        fprintf(file, "%s\n", content);
+    } else {
+        fprintf(file, "Default content for file '%s'\n", filename);
+    }
+    
+    fclose(file);
+    printf("File '%s' created successfully.\n", filename);
+    return 0;
+}
+
+int modify_file(const char* filename, const char* new_content) {
+    FILE* file = fopen(filename, "w");
+    if (file == NULL) {
+        perror("Failed to open file for modification");
+        return -1;
+    }
+    
+    if (new_content != NULL && new_content[0] != '\0') {
+        fprintf(file, "%s\n", new_content);
+    } else {
+        fprintf(file, "Modified content for file '%s'\n", filename);
+    }
+    
+    fclose(file);
+    printf("File '%s' modified successfully.\n", filename);
+    return 0;
+}
+
+void view_file(const char* filename) {
+    FILE* file = fopen(filename, "r");
+    if (file == NULL) {
+        perror("File not found");
+        return;
+    }
+    
+    printf("Contents of '%s':\n", filename);
+    char line[MAX_CONTENT_SIZE];
+    while (fgets(line, sizeof(line), file)) {
+        printf("%s", line);
+    }
+    
+    fclose(file);
+}
+
+int delete_file(const char* filename) {
+    if (remove(filename) == -1) {
+        perror("Failed to delete file");
+        return -1;
+    }
+    
+    printf("File '%s' deleted successfully.\n", filename);
+    return 0;
 }
